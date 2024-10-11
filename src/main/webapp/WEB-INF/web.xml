@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
-         version="3.1">
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+         http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
   <servlet>
-    <servlet-name>VisitorCountServlet</servlet-name>
-    <servlet-class>VisitorCountServlet</servlet-class>
+    <servlet-name>FormHandler</servlet-name>
+    <servlet-class>com.example.FormHandler</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>VisitorCountServlet</servlet-name>
-    <url-pattern>/visitorCount</url-pattern>
+    <servlet-name>FormHandler</servlet-name>
+    <url-pattern>/FormHandler</url-pattern>
   </servlet-mapping>
+</web-app><?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+         http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+<servlet>
+  <servlet-name>FormHandler</servlet-name>
+  <servlet-class>com.example.FormHandler</servlet-class>
+</servlet>
+<servlet-mapping>
+  <servlet-name>FormHandler</servlet-name>
+  <url-pattern>/FormHandler</url-pattern>
+</servlet-mapping>
 </web-app>

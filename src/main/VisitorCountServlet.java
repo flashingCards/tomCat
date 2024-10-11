@@ -1,79 +1,69 @@
-import java.io.IOException;
-import java.io.PrintWriter;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+public class FormHandler extends HttpServlet {
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/your_database";
+    private static final String DB_USERNAME = "your_username";
+    private static final String DB_PASSWORD = "your_password";
 
-public class VisitorCountServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Get form data
+        String name = req.getParameter("name");
+        String address = req.getParameter("address");
+        String language = req.getParameter("language");
+        String country = req.getParameter("country");
 
-    public void init() {
-        // Initialize visitor count from XML file
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse("visitorCount.xml");
-            NodeList nodeList = doc.getElementsByTagName("visitorCount");
-            Element element = (Element) nodeList.item(0);
-            String visitorCount = element.getTextContent();
-            System.out.println("Initial Visitor Count: " + visitorCount);
-        } catch (Exception e) {
-            System.out.println("Error initializing visitor count: " + e.getMessage());
+        // Save form data to database
+        saveFormData(name, address, language, country);
+
+        // Get visitor number from database
+        int visitorNumber = getVisitorNumber();
+
+        // Display visitor number
+        resp.setContentType("text/html");
+        PrintWriter out = resp.getWriter();
+        out.println("<h1>Thank you for submitting the form!</h1>");
+        out.println("<p>Visitor Number: " + visitorNumber + "</p>");
+    }
+
+    private void saveFormData(String name, String address, String language, String country) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+            String query = "INSERT INTO visitor_info (name, address, language, country) VALUES (?, ?, ?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, name);
+            pstmt.setString(2, address);
+            pstmt.setString(3, language);
+            pstmt.setString(4, country);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error saving form data: " + e.getMessage());
         }
     }
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        // Handle GET request to retrieve visitor count
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse("visitorCount.xml");
-            NodeList nodeList = doc.getElementsByTagName("visitorCount");
-            Element element = (Element) nodeList.item(0);
-            String visitorCount = element.getTextContent();
-            response.setContentType("text/xml");
-            PrintWriter out = response.getWriter();
-            out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?><visitorCount>" + visitorCount + "</visitorCount>");
-        } catch (Exception e) {
-            System.out.println("Error retrieving visitor count: " + e.getMessage());
-        }
-    }
-
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        // Handle POST request to update visitor count
-        try {
-            String newVisitorCount = request.getParameter("count");
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse("visitorCount.xml");
-            NodeList nodeList = doc.getElementsByTagName("visitorCount");
-            Element element = (Element) nodeList.item(0);
-            element.setTextContent(newVisitorCount);
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult("visitorCount.xml");
-            transformer.transform(source, result);
-            response.setContentType("text/xml");
-            PrintWriter out = response.getWriter();
-            out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?><visitorCount>" + newVisitorCount + "</visitorCount>");
-        } catch (Exception e) {
-            System.out.println("Error updating visitor count: " + e.getMessage());
+    private int getVisitorNumber() {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+            String query = "SELECT COUNT(*) FROM visitor_info";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet result = pstmt.executeQuery();
+            if (result.next()) {
+                return result.getInt(1);
+            } else {
+                return 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting visitor number: " + e.getMessage());
+            return 0;
         }
     }
 }
